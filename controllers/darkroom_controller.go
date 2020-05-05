@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"context"
-
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -38,10 +37,14 @@ type DarkroomReconciler struct {
 // +kubebuilder:rbac:groups=deployments.gojek.io,resources=darkrooms/status,verbs=get;update;patch
 
 func (r *DarkroomReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	_ = context.Background()
+	ctx := context.Background()
 	_ = r.Log.WithValues("darkroom", req.NamespacedName)
 
 	// your logic here
+	var darkroom deploymentsv1alpha1.Darkroom
+	if err := r.Get(ctx, req.NamespacedName, &darkroom); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
 
 	return ctrl.Result{}, nil
 }
