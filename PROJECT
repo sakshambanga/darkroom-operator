@@ -1,3 +1,7 @@
 domain: gojek.io
 repo: github.com/devlup-labs/darkroom-operator
+resources:
+- group: deployments
+  kind: Darkroom
+  version: v1alpha1
 version: "2"
