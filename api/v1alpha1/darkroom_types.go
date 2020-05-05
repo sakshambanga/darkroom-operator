@@ -20,16 +20,21 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+type Kind string
+
+const (
+	WEB_FOLDER Kind = "WebFolder"
+)
+
+type Source struct {
+	Kind    Kind   `json:"kind"`
+	BaseURL string `json:"baseUrl"`
+}
 
 // DarkroomSpec defines the desired state of Darkroom
 type DarkroomSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// Foo is an example field of Darkroom. Edit Darkroom_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	Version string `json:"version"`
+	Source  Source `json:"source"`
 }
 
 // DarkroomStatus defines the observed state of Darkroom
@@ -39,6 +44,9 @@ type DarkroomStatus struct {
 }
 
 // +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:JSONPath=".spec.version",name=VERSION,type=string
+// +kubebuilder:printcolumn:JSONPath=".spec.source.kind",name=KIND,type=string
 
 // Darkroom is the Schema for the darkrooms API
 type Darkroom struct {

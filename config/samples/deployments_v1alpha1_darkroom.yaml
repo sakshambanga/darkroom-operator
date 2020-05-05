@@ -3,5 +3,7 @@ kind: Darkroom
 metadata:
   name: darkroom-sample
 spec:
-  # Add fields here
-  foo: bar
+  version: 0.1.0
+  source:
+    kind: WebFolder
+    baseUrl: https://students.iitj.ac.in/media

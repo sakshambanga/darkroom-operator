@@ -8,6 +8,13 @@ metadata:
   creationTimestamp: null
   name: darkrooms.deployments.gojek.io
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .spec.version
+    name: VERSION
+    type: string
+  - JSONPath: .spec.source.kind
+    name: KIND
+    type: string
   group: deployments.gojek.io
   names:
     kind: Darkroom
@@ -15,6 +22,8 @@ spec:
     plural: darkrooms
     singular: darkroom
   scope: Namespaced
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: Darkroom is the Schema for the darkrooms API
@@ -34,10 +43,21 @@ spec:
         spec:
           description: DarkroomSpec defines the desired state of Darkroom
           properties:
-            foo:
-              description: Foo is an example field of Darkroom. Edit Darkroom_types.go
-                to remove/update
+            source:
+              properties:
+                baseUrl:
+                  type: string
+                kind:
+                  type: string
+              required:
+              - baseUrl
+              - kind
+              type: object
+            version:
               type: string
+          required:
+          - source
+          - version
           type: object
         status:
           description: DarkroomStatus defines the observed state of Darkroom
