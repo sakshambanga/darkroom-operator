@@ -19,6 +19,8 @@ package controllers
 import (
 	"context"
 	"github.com/go-logr/logr"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -40,10 +42,45 @@ func (r *DarkroomReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	ctx := context.Background()
 	_ = r.Log.WithValues("darkroom", req.NamespacedName)
 
-	// your logic here
 	var darkroom deploymentsv1alpha1.Darkroom
 	if err := r.Get(ctx, req.NamespacedName, &darkroom); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	cfg, err := r.desiredConfigMap(darkroom)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	deployment, err := r.desiredDeployment(darkroom, cfg)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	svc, err := r.desiredService(darkroom)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	applyOpts := []client.PatchOption{client.ForceOwnership, client.FieldOwner("darkroom-controller")}
+
+	err = r.Patch(ctx, &cfg, client.Apply, applyOpts...)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	err = r.Patch(ctx, &deployment, client.Apply, applyOpts...)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	err = r.Patch(ctx, &svc, client.Apply, applyOpts...)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	darkroom.Status.URL = urlForService(svc, 8080)
+	err = r.Status().Update(ctx, &darkroom)
+	if err != nil {
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -52,5 +89,8 @@ func (r *DarkroomReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 func (r *DarkroomReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&deploymentsv1alpha1.Darkroom{}).
+		Owns(&corev1.ConfigMap{}).
+		Owns(&corev1.Service{}).
+		Owns(&appsv1.Deployment{}).
 		Complete(r)
 }

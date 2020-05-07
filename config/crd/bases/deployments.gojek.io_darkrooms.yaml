@@ -61,6 +61,11 @@ spec:
           type: object
         status:
           description: DarkroomStatus defines the observed state of Darkroom
+          properties:
+            url:
+              type: string
+          required:
+          - url
           type: object
       type: object
   version: v1alpha1

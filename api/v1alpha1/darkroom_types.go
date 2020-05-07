@@ -39,8 +39,7 @@ type DarkroomSpec struct {
 
 // DarkroomStatus defines the observed state of Darkroom
 type DarkroomStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	URL string `json:"url"`
 }
 
 // +kubebuilder:object:root=true
