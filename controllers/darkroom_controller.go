@@ -59,6 +59,11 @@ func (r *DarkroomReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	if err != nil {
 		return ctrl.Result{}, err
 	}
+	
+	igr, err := r.desiredIngress(darkroom)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
 	applyOpts := []client.PatchOption{client.ForceOwnership, client.FieldOwner("darkroom-controller")}
 
@@ -69,6 +74,11 @@ func (r *DarkroomReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 
 	err = r.Patch(ctx, &deployment, client.Apply, applyOpts...)
 	if err != nil {
+		return ctrl.Result{}, err
+	}
+	
+	err = r.Patch(ctx, &igr, client.Apply, applyOpts...)
+	if err!= nil {
 		return ctrl.Result{}, err
 	}
 
